@@ -1,0 +1,11 @@
+{
+    "name": "davi/acl",
+    "description": "Gerenciamento de permissões de usuário",
+    "authors": [
+        {
+            "name": "DaviMenezes",
+            "email": "davimenezes.dev@gmail.com"
+        }
+    ],
+    "require": {}
+}
