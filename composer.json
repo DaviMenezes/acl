@@ -1,6 +1,7 @@
 {
     "name": "dvi/acl",
     "description": "Gerenciamento de permissões de usuário",
+    "license": "MIT",
     "authors": [
         {
             "name": "DaviMenezes",
