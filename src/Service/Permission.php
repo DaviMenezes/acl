@@ -22,22 +22,18 @@ abstract class Permission
 {
     public function __call($method, $arguments)
     {
-        $action = $this->prepareMethodName($method);
+        //enable if also works with database permissions
+        /*$hasPermissionGroup = $this->hasPermissionGroup($method);
+        $hasUserPermission = $this->hasUserPermission($method);
 
-        if ($this->methodSpecificExists($action, $arguments)) {
-            return call_user_func_array([$this, $action], $arguments);
+        if (!$hasPermissionGroup and !$hasUserPermission) {
+            return false;
+        }*/
+
+        $method = $this->prepareMethodName($method);
+        if ($this->methodExtraValidationExists($method, $arguments)) {
+            return call_user_func_array([$this, $method], $arguments);
         }
-
-        $user_id = $arguments[0];
-
-        if ($this->hasPermissionGroup($action, $user_id)) {
-            return true;
-        }
-
-        if ($this->hasUserPermission($action, $user_id)) {
-            return true;
-        }
-
         return false;
     }
 
@@ -50,20 +46,19 @@ abstract class Permission
             foreach ($array_undescore as $item) {
                 $name .= ucfirst($item);
             }
-            return $name = 'can'.$name; //ex. canCreate
         }
-        return $name;
+        return 'can'.$name;
     }
 
-    protected function methodSpecificExists($method_name, $arguments)
+    protected function methodExtraValidationExists($method, $arguments)
     {
-        if (method_exists($this, $method_name)) {
+        if (method_exists($this, $method)) {
            return true;
         }
         return false;
     }
 
-    protected function hasPermissionGroup($name, $user_id): bool
+    protected function hasPermissionGroup($permission): bool
     {
         $group_result = UserGroups::db('aug')
             ->select(['aug.user_id', 'ag.name', 'am.name', 'aat.name as action'])
@@ -71,18 +66,18 @@ abstract class Permission
             ->join(GroupActions::TABLENAME.' as aga', 'ag.id', '=', 'aga.group_id')
             ->join(ActionTypes::TABLENAME.' as aat', 'aga.action_id', '=', 'aat.id')
             ->join(Modules::TABLENAME.' as am', 'aat.module_id', '=', 'am.id')
-            ->where('aug.user_id', '=', $user_id)
-            ->where('aat.name', '=', $name)
-            ->toSql();
+            ->where('aug.user_id', '=', loggedUser()->id)
+            ->where('aat.name', '=', $permission)
+            ->count();
         return $group_result > 0 ? true : false;
     }
 
-    protected function hasUserPermission($name, $user_id): bool
+    protected function hasUserPermission($permission): bool
     {
         $result = UserActions::db('aup')
             ->leftJoin(ActionTypes::TABLENAME . ' as auat', 'aup.action_id', '=', 'auat.id')
-            ->where('aup.user_id', '=', $user_id)
-            ->where('auat.name', '=', $name)
+            ->where('aup.user_id', '=', loggedUser()->id)
+            ->where('auat.name', '=', $permission)
             ->count();
 
         return $result > 0 ? true : false;
