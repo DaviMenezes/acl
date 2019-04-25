@@ -41,12 +41,11 @@ abstract class Permission
     {
         $array_undescore = explode('_', $name);
 
-        if (count($array_undescore) > 1) {
-            $name = '';
-            foreach ($array_undescore as $item) {
-                $name .= ucfirst($item);
-            }
+        $name = '';
+        foreach ($array_undescore as $item) {
+            $name .= ucfirst($item);
         }
+
         return 'can'.$name;
     }
 
