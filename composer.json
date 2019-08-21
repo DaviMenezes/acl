@@ -8,5 +8,7 @@
             "email": "davimenezes.dev@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "spatie/enum": "^1.1"
+    }
 }
